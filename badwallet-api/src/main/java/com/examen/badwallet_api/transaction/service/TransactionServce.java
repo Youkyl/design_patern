@@ -3,6 +3,7 @@ package com.examen.badwallet_api.transaction.service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.springframework.stereotype.Service;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.examen.badwallet_api.strategy.DepositStrategy;
 import com.examen.badwallet_api.strategy.DepositStrategyFactory;
 import com.examen.badwallet_api.transaction.dto.DepositRequest;
+import com.examen.badwallet_api.transaction.dto.TransactionResponse;
 import com.examen.badwallet_api.transaction.dto.TransferRequest;
 import com.examen.badwallet_api.transaction.dto.WithdrawRequest;
 import com.examen.badwallet_api.transaction.enums.TransactionType;
@@ -108,5 +110,12 @@ public class TransactionServce {
                 .build());
 
         return walletServ.toResponse(savedSender);
+    }
+
+    public List<TransactionResponse> getHistory(String phone) {
+        return transactionRepository.findByWallet_Phone(phone)
+                .stream()
+                .map(t -> new TransactionResponse(t.getId(), t.getType(), t.getAmount(), t.getPaymentMethod(), t.getCreatedAt()))
+                .toList();
     }
 }
