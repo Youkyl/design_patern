@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.examen.badwallet_api.wallet.dto.CreateWalletRequest;
 import com.examen.badwallet_api.wallet.dto.WalletResponse;
+import com.examen.badwallet_api.wallet.service.WalletSeederService;
 import com.examen.badwallet_api.wallet.service.WalletService;
 
 @RestController
@@ -20,6 +21,7 @@ import com.examen.badwallet_api.wallet.service.WalletService;
 public class WalletController {
 
     private final WalletService walletService;
+    private final WalletSeederService walletSeederService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -40,6 +42,12 @@ public class WalletController {
     @GetMapping("/{phone}/balance")
     public BigDecimal getBalance(@PathVariable String phone) {
         return walletService.getBalance(phone);
+    }
+
+    @PostMapping("/seed")
+    public String seed(@RequestParam int numWallets, @RequestParam int eventsPerWallet) {
+        walletSeederService.seed(numWallets, eventsPerWallet);
+        return "Seeding lancé en arrière-plan pour " + numWallets + " wallets";
     }
 
 }
