@@ -22,7 +22,6 @@ import com.examen.badwallet_api.wallet.service.WalletService;
 public class WalletController {
 
     private final WalletService walletService;
-    private final TransactionServce transacServ;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -45,8 +44,4 @@ public class WalletController {
         return walletService.getBalance(phone);
     }
 
-    @PostMapping("/{id}/deposit")
-    public WalletResponse deposit(@PathVariable Long id, @Valid @RequestBody DepositRequest request) {
-        return transacServ.deposit(id, request);
-    }
 }
