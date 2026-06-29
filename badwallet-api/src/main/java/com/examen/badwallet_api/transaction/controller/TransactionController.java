@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.examen.badwallet_api.transaction.dto.DepositRequest;
+import com.examen.badwallet_api.transaction.dto.TransferRequest;
 import com.examen.badwallet_api.transaction.dto.WithdrawRequest;
 import com.examen.badwallet_api.transaction.service.TransactionServce;
 import com.examen.badwallet_api.wallet.dto.WalletResponse;
@@ -32,6 +33,11 @@ public class TransactionController {
     @PostMapping("/withdraw")
     public WalletResponse withdraw(@Valid @RequestBody WithdrawRequest request) {
         return transacServ.withdraw(request);
+    }
+
+    @PostMapping("/transfer")
+    public WalletResponse transfer(@Valid @RequestBody TransferRequest request) {
+        return transacServ.transfer(request);
     }
         
 }

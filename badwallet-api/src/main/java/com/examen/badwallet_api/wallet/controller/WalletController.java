@@ -10,8 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import com.examen.badwallet_api.transaction.dto.DepositRequest;
-import com.examen.badwallet_api.transaction.service.TransactionServce;
 import com.examen.badwallet_api.wallet.dto.CreateWalletRequest;
 import com.examen.badwallet_api.wallet.dto.WalletResponse;
 import com.examen.badwallet_api.wallet.service.WalletService;
