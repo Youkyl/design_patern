@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.examen.badwallet_api.strategy.DepositStrategy;
 import com.examen.badwallet_api.strategy.DepositStrategyFactory;
 import com.examen.badwallet_api.transaction.dto.DepositRequest;
+import com.examen.badwallet_api.transaction.dto.TransferRequest;
 import com.examen.badwallet_api.transaction.dto.WithdrawRequest;
 import com.examen.badwallet_api.transaction.enums.TransactionType;
 import com.examen.badwallet_api.transaction.models.Transaction;
@@ -81,5 +82,31 @@ public class TransactionServce {
                 .build());
 
         return walletServ.toResponse(saved);
+    }
+
+    public WalletResponse transfer(TransferRequest request) {
+        Wallet sender = walletRepository.findByPhone(request.senderPhone())
+                .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + request.senderPhone()));
+        Wallet receiver = walletRepository.findByPhone(request.receiverPhone())
+                .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + request.receiverPhone()));
+
+        if (sender.getBalance().compareTo(request.amount()) < 0) {
+            throw new IllegalStateException("Solde insuffisant");
+        }
+
+        sender.setBalance(sender.getBalance().subtract(request.amount()));
+        receiver.setBalance(receiver.getBalance().add(request.amount()));
+
+        Wallet savedSender = walletRepository.save(sender);
+        walletRepository.save(receiver);
+
+        transactionRepository.save(Transaction.builder()
+                .wallet(savedSender)
+                .type(TransactionType.TRANSFER)
+                .amount(request.amount())
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        return walletServ.toResponse(savedSender);
     }
 }
