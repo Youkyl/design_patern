@@ -1,5 +1,7 @@
 package com.examen.badwallet_api.transaction.service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 import com.examen.badwallet_api.strategy.DepositStrategy;
 import com.examen.badwallet_api.strategy.DepositStrategyFactory;
 import com.examen.badwallet_api.transaction.dto.DepositRequest;
+import com.examen.badwallet_api.transaction.dto.WithdrawRequest;
 import com.examen.badwallet_api.transaction.enums.TransactionType;
 import com.examen.badwallet_api.transaction.models.Transaction;
 import com.examen.badwallet_api.transaction.repository.TransactionRepository;
@@ -28,6 +31,8 @@ public class TransactionServce {
     private final TransactionRepository transactionRepository;
     private final DepositStrategyFactory depositStrategyFactory;
 
+    private static final BigDecimal RATE = new BigDecimal("0.01");
+    private static final BigDecimal CAP = new BigDecimal("5000");
 
 
     public WalletResponse deposit(Long walletId, DepositRequest request) {
@@ -43,6 +48,35 @@ public class TransactionServce {
                 .type(TransactionType.DEPOSIT)
                 .amount(request.amount())
                 .paymentMethod(request.paymentMethod())
+                .createdAt(LocalDateTime.now())
+                .build());
+
+        return walletServ.toResponse(saved);
+    }
+
+    public BigDecimal computeFee(BigDecimal amount) {
+        BigDecimal fee = amount.multiply(RATE).setScale(0, RoundingMode.HALF_UP);
+        return fee.min(CAP);
+    }
+
+    public WalletResponse withdraw(WithdrawRequest request) {
+        Wallet wallet = walletRepository.findByPhone(request.phone())
+                .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + request.phone()));
+
+        BigDecimal fee = this.computeFee(request.amount());
+        BigDecimal totalDebit = request.amount().add(fee);
+
+        if (wallet.getBalance().compareTo(totalDebit) < 0) {
+            throw new IllegalStateException("Solde insuffisant");
+        }
+
+        wallet.setBalance(wallet.getBalance().subtract(totalDebit));
+        Wallet saved = walletRepository.save(wallet);
+
+        transactionRepository.save(Transaction.builder()
+                .wallet(saved)
+                .type(TransactionType.WITHDRAW)
+                .amount(request.amount())
                 .createdAt(LocalDateTime.now())
                 .build());
 
