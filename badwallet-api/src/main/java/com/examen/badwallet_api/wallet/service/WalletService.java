@@ -16,7 +16,7 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 public class WalletService {
-    
+
     private final WalletRepository walletRepository;
 
     public WalletResponse createWallet(CreateWalletRequest request) {
@@ -56,7 +56,7 @@ public class WalletService {
                 .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + phone));
     }
 
-    private WalletResponse toResponse(Wallet w) {
+    public WalletResponse toResponse(Wallet w) {
         return new WalletResponse(w.getId(), w.getPhone(), w.getEmail(),
                 w.getBalance(), w.getCode(), w.getCurrency());
     }
