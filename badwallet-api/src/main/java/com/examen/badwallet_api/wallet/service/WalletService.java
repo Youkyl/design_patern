@@ -1,5 +1,10 @@
 package com.examen.badwallet_api.wallet.service;
 
+import java.math.BigDecimal;
+import java.util.NoSuchElementException;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import com.examen.badwallet_api.wallet.dto.CreateWalletRequest;
@@ -33,6 +38,27 @@ public class WalletService {
                 saved.getId(), saved.getPhone(), saved.getEmail(),
                 saved.getBalance(), saved.getCode(), saved.getCurrency()
         );
+    }
+
+    public Page<WalletResponse> listWallets(Pageable pageable) {
+        return walletRepository.findAll(pageable).map(this::toResponse);
+    }
+
+    public WalletResponse getByphone(String phone) {
+        Wallet wallet = walletRepository.findByPhone(phone)
+                .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + phone));
+        return toResponse(wallet);
+    }
+
+    public BigDecimal getBalance(String phone) {
+        return walletRepository.findByPhone(phone)
+                .map(Wallet::getBalance)
+                .orElseThrow(() -> new NoSuchElementException("Wallet introuvable pour " + phone));
+    }
+
+    private WalletResponse toResponse(Wallet w) {
+        return new WalletResponse(w.getId(), w.getPhone(), w.getEmail(),
+                w.getBalance(), w.getCode(), w.getCurrency());
     }
 
 }
